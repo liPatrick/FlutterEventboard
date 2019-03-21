@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'event_model.dart';
 import 'event_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() => runApp(MyApp());
+void test() {
+  Firestore.instance.collection('events').snapshots().listen((data) =>
+      data.documents.forEach((doc) => print(doc["event_creator_id"])));
+}
+
+void main() {
+  runApp(MyApp());
+  print("Hello!");
+  test();
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -13,7 +25,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Eventboard',
+      theme: ThemeData(fontFamily: 'Quicksand'),
       home: MyHomePage(title: 'Eventboard'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -41,13 +55,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // hardcode some events
   List<Event> initialEvents = []..add(Event(
+      "Daniel Bessonov",
       "TEDx Saratoga High",
       "Lorem ipsum lorem ipsum ispum lorem.",
       "Conference Hall 12",
       "December 11th, 2019"));
 
+  GlobalKey bottomNavigationKey = GlobalKey();
+
   Widget titleSection = Container(
-      padding: EdgeInsets.all(28),
+      padding: EdgeInsets.only(top: 30, left: 27, right: 30),
       child: Row(
         children: <Widget>[
           Column(
@@ -57,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
               CupertinoButton(
                 child: Semantics(
                   child: const Icon(
-                    CupertinoIcons.add_circled,
+                    CupertinoIcons.add_circled_solid,
                     color: Colors.white,
                     size: 44.0,
                   ),
@@ -66,38 +83,79 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
           ),
-          Text("Events Near Me"),
+        ],
+      ));
+
+  Widget eventsNearMe = Container(
+      padding: EdgeInsets.only(top: 12, left: 47, right: 30),
+      child: Row(
+        children: <Widget>[
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              //Icon(Icons.add, color: Colors.blue),
+              Text(
+                "Events near me",
+                style: TextStyle(
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 25.0),
+              )
+            ],
+          ),
+        ],
+      ));
+
+  Widget numEventsNearYou = Container(
+      padding: EdgeInsets.only(top: 5, left: 47, right: 30),
+      child: Row(
+        children: <Widget>[
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              //Icon(Icons.add, color: Colors.blue),
+              Text(
+                "10 events near you",
+                style: TextStyle(
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w100,
+                    color: Colors.white,
+                    fontSize: 15.5),
+              )
+            ],
+          ),
         ],
       ));
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Eventboard"),
-          backgroundColor: Colors.black87,
+      body: Container(
+        // background color
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              stops: [
+                0.4,
+                0.7
+              ],
+              colors: [
+                Color(0xFFBC9CFF),
+                Color(0xFF8BA4F9),
+              ]),
         ),
-        body: Container(
-          // background color
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                stops: [
-                  0.1,
-                  0.5
-                ],
-                colors: [
-                  Color(0xFF8BA4F9),
-                  Color(0xFFBC9CFF),
-                ]),
-          ),
-          child: Column(
-            // main container
-            children: <Widget>[
-              titleSection,
-              // card section
-              Container(
+        child: Column(
+          // main container
+          children: <Widget>[
+            titleSection,
+            eventsNearMe,
+            numEventsNearYou,
+            // card section
+            Center(
+              child: Container(
+                padding: EdgeInsets.only(top: 40.0),
                 // main column
                 //color: Colors.green,
                 child: Row(
@@ -115,7 +173,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         loop: false,
                         itemBuilder: (BuildContext context, int index) {
                           return EventCard(Event(
-                              "Daniel", "eventSummary", "location", "date"));
+                              "Daniel Bessonov",
+                              "TEDx Saratoga High",
+                              "This is a summary of the event. They are working on cool blockchain technologies.",
+                              "McAffee, Saratoga High",
+                              "December 18th, 2019"));
                           /*return new Image.network(
                             "http://via.placeholder.com/300x300",
                             fit: BoxFit.fitWidth,
@@ -124,15 +186,35 @@ class _MyHomePageState extends State<MyHomePage> {
                         itemCount: 3,
                         viewportFraction: 0.78,
                         scale: 0.9,
-                        //pagination: new SwiperPagination(),
+
                         //control: new SwiperControl(),
                       ),
                     ),
                   ],
                 ),
-              )
-            ],
-          ),
-        ));
+              ),
+            )
+          ],
+        ),
+      ),
+      bottomNavigationBar: FancyBottomNavigation(
+        tabs: [
+          TabData(
+              iconData: Icons.star, title: "Events near me", onclick: () => {}),
+          TabData(iconData: Icons.person, title: "Profile", onclick: () => {}),
+        ],
+        initialSelection: 0,
+        key: bottomNavigationKey,
+        activeIconColor: Color(0xFFBC9CFF),
+        circleColor: Color(0xFFEFE7FF),
+        inactiveIconColor: Color(0xFFBC9CFF),
+        textColor: Color(0xFF7f8c8d),
+        onTabChangedListener: (position) {
+          setState(() {
+            //currentPage = position;
+          });
+        },
+      ),
+    );
   }
 }
