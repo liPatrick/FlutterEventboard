@@ -20,10 +20,10 @@ class _EventCardState extends State<EventCard> {
     this.event = event;
   }
 
-  Widget get eventCard {
+  Widget _eventCard(BuildContext context) {
     return Container(
-        width: 300,
-        height: 375,
+        width: MediaQuery.of(context).size.width / 1.32,
+        height: MediaQuery.of(context).size.height / 2,
         child: Card(
           color: Colors.white,
           shape:
@@ -106,7 +106,7 @@ class _EventCardState extends State<EventCard> {
                           Padding(
                             padding: EdgeInsets.only(top: 10.0, right: 10.0),
                             child: Text(
-                             event.date,
+                              event.date,
                               style: TextStyle(
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.normal,
@@ -163,25 +163,27 @@ class _EventCardState extends State<EventCard> {
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.only(top: 10.0),
-                    child: RaisedButton(
-                      color: Color(0xFFEFE7FF),
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 15, bottom: 15, right: 20.0, left: 20),
-                        child: Text(
-                          "Enter the event page",
-                          style: TextStyle(
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFBC9CFF),
-                              fontSize: 13.0),
-                          textAlign: TextAlign.left,
+                      child: RaisedButton(
+                        color: Color(0xFFEFE7FF),
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              top: 15, bottom: 15, right: 20.0, left: 20),
+                          child: Text(
+                            "Enter the event page",
+                            style: TextStyle(
+                                fontFamily: 'Quicksand',
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFBC9CFF),
+                                fontSize: 13.0),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15)),
+                        onPressed: () => {},
                       ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      onPressed: () => {},
-                    ),)
+                    )
                   ],
                 )
               ],
@@ -194,7 +196,7 @@ class _EventCardState extends State<EventCard> {
   Widget build(BuildContext context) {
     return Container(
       child: Row(
-        children: <Widget>[eventCard],
+        children: <Widget>[_eventCard(context)],
       ),
     );
   }

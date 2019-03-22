@@ -7,7 +7,6 @@ import 'event_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -117,36 +116,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ));
 
+  // main UI
   @override
   Widget build(BuildContext context) {
-
-    //Queries Firebase for events
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection("events").snapshots(),
-      builder: (BuildContext context, 
-        AsyncSnapshot<QuerySnapshot> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-           return new Center(child: new CircularProgressIndicator());
-          default:
-          print("debug");
-           return _buildList(context, snapshot.data.documents);
-        }
-      },
-    );
-  }
-
-  
-  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
-
-    //mapping snapshot into initialEvents arraylist
-    initialEvents = [];
-    snapshot.forEach((doc) {
-      var event = Event(doc["event_creator_name"], doc["event_title"], doc["event_summary"], doc["lat"], doc["long"], doc["date_created"]);
-      print(event);
-      initialEvents.add(event);
-    });
-
     return Scaffold(
       body: Container(
         // background color
@@ -169,52 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
             titleSection,
             eventsNearMe,
             numEventsNearYou,
-           
-           
+            _buildList(context),
             // card section
-            Center(
-              child: Container(
-                padding: EdgeInsets.only(top: 40.0),
-                // main column
-                //color: Colors.green,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  // children in row 1
-                  children: <Widget>[
-                    // container for swiper
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 2,
-                      // create a new event card
-                      child: new Swiper(
-                        // set cont. loop to false
-                        loop: false,
-                        itemBuilder: (BuildContext context, int index) {
-                          //var eventcard =EventCard(event)
-                          return EventCard(initialEvents[index]);
-                          /*return EventCard(Event(
-                              "Daniel Bessonov",
-                              "TEDx Saratoga High",
-                              "This is a summary of the event. They are working on cool blockchain technologies.",
-                              "McAffee, Saratoga High",
-                              "December 18th, 2019"));*/
-                          /*return new Image.network(
-                            "http://via.placeholder.com/300x300",
-                            fit: BoxFit.fitWidth,
-                          );*/
-                        },
-                        itemCount: initialEvents.length,
-                        viewportFraction: 0.78,
-                        scale: 0.9,
-
-                        //control: new SwiperControl(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
           ],
         ),
       ),
@@ -235,6 +163,69 @@ class _MyHomePageState extends State<MyHomePage> {
             //currentPage = position;
           });
         },
+      ),
+    );
+    //Queries Firebase for events
+  }
+
+  Widget _buildList(BuildContext context) {
+    //mapping snapshot into initialEvents arraylist
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection("events").snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return new Center(child: new CircularProgressIndicator());
+          default:
+            initialEvents = [];
+            snapshot.data.documents.forEach((doc) {
+              var event = Event(
+                  doc["event_creator_name"],
+                  doc["event_title"],
+                  doc["event_summary"],
+                  doc["lat"],
+                  doc["long"],
+                  doc["date_created"]);
+              initialEvents.add(event);
+            });
+            print("returning");
+            return _createEventCards(context);
+        }
+      },
+    );
+  }
+
+  Widget _createEventCards(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.only(top: 40.0),
+        // main column
+        //color: Colors.green,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          // children in row 1
+          children: <Widget>[
+            // container for swiper
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 2,
+              // create a new event card
+              child: new Swiper(
+                // set cont. loop to false
+                loop: false,
+                itemBuilder: (BuildContext context, int index) {
+                  //var eventcard =EventCard(event)
+                  return EventCard(initialEvents[index]);
+                },
+                itemCount: initialEvents.length,
+                viewportFraction: 0.78,
+                scale: 0.9,
+                //control: new SwiperControl(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
