@@ -7,15 +7,9 @@ import 'event_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-void test() {
-  Firestore.instance.collection('events').snapshots().listen((data) =>
-      data.documents.forEach((doc) => print(doc["event_creator_id"])));
-}
 
 void main() {
   runApp(MyApp());
-  print("Hello!");
-  test();
 }
 
 class MyApp extends StatelessWidget {
@@ -54,12 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   // hardcode some events
-  List<Event> initialEvents = []..add(Event(
-      "Daniel Bessonov",
-      "TEDx Saratoga High",
-      "Lorem ipsum lorem ipsum ispum lorem.",
-      "Conference Hall 12",
-      "December 11th, 2019"));
+  List<Event> initialEvents = [];
 
   GlobalKey bottomNavigationKey = GlobalKey();
 
@@ -130,6 +119,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    //Queries Firebase for events
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection("events").snapshots(),
+      builder: (BuildContext context, 
+        AsyncSnapshot<QuerySnapshot> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+           return new Center(child: new CircularProgressIndicator());
+          default:
+          print("debug");
+           return _buildList(context, snapshot.data.documents);
+        }
+      },
+    );
+  }
+
+  
+  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+
+    //mapping snapshot into initialEvents arraylist
+    initialEvents = [];
+    snapshot.forEach((doc) {
+      var event = Event(doc["event_creator_name"], doc["event_title"], doc["event_summary"], doc["lat"], doc["long"], doc["date_created"]);
+      print(event);
+      initialEvents.add(event);
+    });
+
     return Scaffold(
       body: Container(
         // background color
@@ -152,6 +169,8 @@ class _MyHomePageState extends State<MyHomePage> {
             titleSection,
             eventsNearMe,
             numEventsNearYou,
+           
+           
             // card section
             Center(
               child: Container(
@@ -172,18 +191,20 @@ class _MyHomePageState extends State<MyHomePage> {
                         // set cont. loop to false
                         loop: false,
                         itemBuilder: (BuildContext context, int index) {
-                          return EventCard(Event(
+                          //var eventcard =EventCard(event)
+                          return EventCard(initialEvents[index]);
+                          /*return EventCard(Event(
                               "Daniel Bessonov",
                               "TEDx Saratoga High",
                               "This is a summary of the event. They are working on cool blockchain technologies.",
                               "McAffee, Saratoga High",
-                              "December 18th, 2019"));
+                              "December 18th, 2019"));*/
                           /*return new Image.network(
                             "http://via.placeholder.com/300x300",
                             fit: BoxFit.fitWidth,
                           );*/
                         },
-                        itemCount: 3,
+                        itemCount: initialEvents.length,
                         viewportFraction: 0.78,
                         scale: 0.9,
 

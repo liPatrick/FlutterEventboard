@@ -6,14 +6,16 @@ class Event {
   String name;
   String title;
   String eventSummary;
-  String location;
+  double lat;
+  double long;
   String date;
 
-  Event(name, title, eventSummary, location, date) {
+  Event(name, title, eventSummary, lat, long, date) {
     this.name = name;
     this.title = title;
     this.eventSummary = eventSummary;
-    this.location = location;
+    this.lat = lat;
+    this.long = long;
     this.date = date;
   }
 

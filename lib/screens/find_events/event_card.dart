@@ -137,7 +137,8 @@ class _EventCardState extends State<EventCard> {
                           Padding(
                             padding: EdgeInsets.only(top: 10.0, right: 10.0),
                             child: Text(
-                              event.location,
+                              "location placeholder text",
+                              //event.location,
                               style: TextStyle(
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.normal,
